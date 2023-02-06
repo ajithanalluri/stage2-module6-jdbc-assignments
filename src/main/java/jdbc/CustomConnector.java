@@ -1,5 +1,6 @@
 package jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ public class CustomConnector {
         return connection;
     }
 
-    public Connection getConnection(String url, String user, String password) {
+    public Connection getConnection(String url, String user, String password) throws IOException {
         try {
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {

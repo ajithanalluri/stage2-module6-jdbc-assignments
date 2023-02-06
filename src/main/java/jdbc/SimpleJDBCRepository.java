@@ -61,7 +61,7 @@ public class SimpleJDBCRepository {
             SELECT id, firstname, lastname, age FROM myusers
             """;
 
-    public Long createUser(User user) {
+    public Long createUser(User user) throws IOException {
         Long id = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(CREATE_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -83,7 +83,7 @@ public class SimpleJDBCRepository {
         return id;
     }
 
-    public User findUserById(Long userId) {
+    public User findUserById(Long userId) throws IOException {
         User user = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_USER_BY_ID_SQL)) {
@@ -98,7 +98,7 @@ public class SimpleJDBCRepository {
         return user;
     }
 
-    public User findUserByName(String userName) {
+    public User findUserByName(String userName) throws IOException {
         User user = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_USER_BY_NAME_SQL)) {
@@ -113,7 +113,7 @@ public class SimpleJDBCRepository {
         return user;
     }
 
-    public List<User> findAllUser() {
+    public List<User> findAllUser() throws IOException {
         List<User> users = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection();
@@ -128,7 +128,7 @@ public class SimpleJDBCRepository {
         return users;
     }
 
-    public User updateUser( User user) {
+    public User updateUser( User user) throws IOException {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_USER_SQL)) {
             statement.setString(1, user.getFirstName());
@@ -144,7 +144,7 @@ public class SimpleJDBCRepository {
         return null;
     }
 
-    public void deleteUser(Long userId) {
+    public void deleteUser(Long userId) throws IOException {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(DELETE_USER)) {
             statement.setLong(1, userId);

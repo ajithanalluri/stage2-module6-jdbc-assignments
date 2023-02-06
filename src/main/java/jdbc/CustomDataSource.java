@@ -54,12 +54,20 @@ public class CustomDataSource implements DataSource {
 
     @Override
     public Connection getConnection() {
-        return new CustomConnector().getConnection(url, name, password);
+        try {
+            return new CustomConnector().getConnection(url, name, password);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Connection getConnection(String s, String s1) {
-        return new CustomConnector().getConnection(url, name, password);
+        try {
+            return new CustomConnector().getConnection(url, name, password);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
