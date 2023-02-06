@@ -17,11 +17,12 @@ import java.util.logging.Logger;
 @Setter
 public class CustomDataSource implements DataSource {
     private static volatile CustomDataSource instance;
+    private static final SQLException SQL_EXCEPTION = new SQLException();
+    private static final Object MONITOR = new Object();
     private final String driver;
     private final String url;
     private final String name;
     private final String password;
-    private static final Object lock = new Object();
 
     private CustomDataSource(String driver, String url, String password, String name) {
         this.driver = driver;
@@ -31,63 +32,78 @@ public class CustomDataSource implements DataSource {
         instance = this;
     }
 
-    public static CustomDataSource getInstance() throws IOException {
-        if (instance == null) {
-            try {
-                Properties properties = new Properties();
-                properties.load(
-                    CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties")
-                );
-                instance = new CustomDataSource(
-                    properties.getProperty("postgres.driver"),
-                    properties.getProperty("postgres.url"),
-                    properties.getProperty("postgres.name"),
-                    properties.getProperty("postgres.password")
+    public static CustomDataSource getInstance() {
 
-                );
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        if (instance == null) {
+
+            synchronized (MONITOR) {
+
+                if (instance == null) {
+
+                    try {
+
+                        Properties properties = new Properties();
+                        properties.load(
+                            CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties")
+                        );
+
+                        instance = new CustomDataSource(
+                            properties.getProperty("postgres.driver"),
+                            properties.getProperty("postgres.url"),
+                            properties.getProperty("postgres.password"),
+                            properties.getProperty("postgres.name")
+                        );
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+
             }
+
         }
+
         return instance;
+
     }
 
     @Override
     public Connection getConnection() {
         try {
             return new CustomConnector().getConnection(url, name, password);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Connection getConnection(String s, String s1) {
+    public Connection getConnection(String username, String password) {
         try {
-            return new CustomConnector().getConnection(url, name, password);
-        } catch (IOException e) {
+            return new CustomConnector().getConnection(url, username, password);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        throw new SQLException();
+        throw SQL_EXCEPTION;
     }
 
     @Override
-    public void setLogWriter(PrintWriter printWriter) throws SQLException {
-        throw new SQLException();
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        throw SQL_EXCEPTION;
     }
 
     @Override
-    public void setLoginTimeout(int i) throws SQLException {
-
+    public void setLoginTimeout(int seconds) throws SQLException {
+        throw SQL_EXCEPTION;
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        throw new SQLException();
+        throw SQL_EXCEPTION;
     }
 
     @Override
@@ -96,13 +112,12 @@ public class CustomDataSource implements DataSource {
     }
 
     @Override
-    public <T> T unwrap(Class<T> aClass) throws SQLException {
-        throw new SQLException();
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw SQL_EXCEPTION;
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> aClass) throws SQLException {
-        throw new SQLException();
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw SQL_EXCEPTION;
     }
-
 }
